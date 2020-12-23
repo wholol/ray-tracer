@@ -53,7 +53,7 @@ int main()
 
 	Vector3d origin(0, 0, 0);
 	Vector3d focal(0, 0, -1.0);	//unit vector from origin to viewport center
-	Vector3d horizontal(viewport_width, 0.0, 0.0);
+	Vector3d horizontal(viewport_width, 0.0, 0.0);dwdw
 	Vector3d vertical(0.0, viewport_height, 0.0);
 	//to determine corner positions: http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
 	Vector3d bottom_left_corner = origin - (horizontal / 2) - (vertical / 2) + (focal * d);
