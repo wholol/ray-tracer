@@ -19,23 +19,23 @@ public:
 	}
 
 	/*checks for all geometries ray intersction.*/
-	bool HitRay(Ray& r, double tMin, double tMax,hit_record& rec)
+	bool HitRay(const Ray& r, double tMin, double tMax,hit_record& rec)
 	{
-		bool hit = false;
+		bool hit_anything = false;
 		hit_record temp;
 		double closest = tMax;
 
 		for (auto& object : objects)
 		{
-			if (object->HitRay(tMin, tMax, r, temp))
+			if (object->HitRay(tMin, closest, r, temp))
 			{
-				hit = true;
-				closest = temp.t;
+				hit_anything = true;
+				closest = temp.t;	//acts as a z buffer
 				rec = temp;
 			}
 		}
 
-		return hit;
+		return hit_anything;
 	}
 
 private:

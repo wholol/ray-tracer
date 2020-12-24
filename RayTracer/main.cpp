@@ -7,31 +7,37 @@
 #include "WorldObjects.h"
 #include "Geometries.h"
 #include "Sphere.h"
+#include "RNG.h"
 
-
-ColorVec Color(const Ray& ray)
+ColorVec Color(const Ray& r, WorldObjects& world, int depth)
 {
-	Vector3d n = ray.GetDir().getNormalized();
-	double t = (n.y * 0.5) + 1.0;
-	ColorVec col = ColorVec(1.0, 1.0, 1.0) * (1.0 - t) + ColorVec(0.5, 0.7, 1.0) * t;
-	return col;
-}
+	hit_record rec;	//obtains paarameters at interection point.
 
-bool hitSphere(const Ray& r, Vector3d center, double radius)
-{
-	Vector3d n_unit = r.GetDir().getNormalized();
-	Vector3d A = r.GetOrgin() - center;		//A - C
-
-	double c = A.getDotProduct(A) - radius * radius;
-	double a =  n_unit.getDotProduct(n_unit);
-	double b = 2.0 * A.getDotProduct(n_unit);
-
-	double discriminant = b * b -( 4 * a * c);
-	if (discriminant < 0)
-	{
-		return false;
+	if (depth <= 0) {
+		return ColorVec(0, 0, 0);
 	}
-	return true;
+
+	Vector3d point_unit_circle = RNG::rng_vec(-1.0, 1.0);
+	while (point_unit_circle.getMagnitude() >= 1.0)
+	{
+		point_unit_circle = RNG::rng_vec(-1.0, 1.0);
+	}
+
+	point_unit_circle.Normalize();
+
+	if (world.HitRay(r, 0.0001, INFINITY, rec))	//if the ray hits any object in world
+	{
+		Vector3d target = rec.point + rec.normal + point_unit_circle;
+		return (Color(Ray(rec.point , target - rec.point), world , depth -1)) * 0.5;
+	}
+
+	else//if no intersection
+	{
+		Vector3d n = r.GetDir().getNormalized();
+		double t = (n.y * 0.5) + 1.0;
+		ColorVec col = ColorVec(1.0, 1.0, 1.0) * (1.0 - t) + ColorVec(0.5, 0.7, 1.0) * t;
+		return col;
+	}
 }
 
 int main()
@@ -58,8 +64,18 @@ int main()
 	//to determine corner positions: http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
 	Vector3d bottom_left_corner = origin - (horizontal / 2) - (vertical / 2) + (focal * d);
 
-	std::ofstream fout("RayTracer.ppm");
+	//world objects setup
+	WorldObjects world;
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1), 0.5));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1), 100));
 
+	//anti aliasing samples
+	const int samples = 100;
+
+	const int max_depth = 50;
+
+	//image setup
+	std::ofstream fout("RayTracer.ppm");
 	fout << "P3" << std::endl;
 	fout << image_width << " " << image_height << std::endl;
 	fout << std::to_string(rgb_max) << std::endl;
@@ -68,19 +84,18 @@ int main()
 	/*ray trace algoruthm here*/
 	for (int j = image_height - 1; j >= 0; --j) {
 		for (int i = 0; i < image_width; ++i) {
-			double u = (double)(j) / (double)(image_height - 1);		//image height ratio
-			double v = (double)(i) / (double)(image_width - 1);		//image width ratio (for unit vector scale)
-			//to determine the ray vector : http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
-			Ray r(RayOrigin, bottom_left_corner + horizontal * v + vertical * u - origin);
-	
-			Vector3d ColorVec = Color(r);
-			Vector3d center(0, 0, -1);
-			if (hitSphere(r,center , 0.5))
-			{
-				ColorVec(255, 0, 0);
+			ColorVec pixel(0.0, 0.0, 0.0);
+
+			for (int k = 0; k < samples; ++k) {
+				double u = (double)(j + RNG::rng()) / (double)(image_height - 1);		//image height ratio
+				double v = (double)(i + RNG::rng()) / (double)(image_width - 1);		//image width ratio (for unit vector scale)
+				//to determine the ray vector : http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
+				Ray r(RayOrigin, bottom_left_corner + horizontal * v + vertical * u - origin);
+				pixel += Color(r, world,max_depth);
+
 			}
 
-			ColorToFile(fout,ColorVec,rgb_max);
+			ColorToFile(fout,pixel,rgb_max,samples);
 
 		}
 	}

@@ -31,5 +31,5 @@ struct hit_record
 class Geometries
 {
 public:
-	virtual bool HitRay(double tMin, double tMax,Ray& ray, hit_record& hit) = 0;
+	virtual bool HitRay(double tMin, double tMax,const Ray& ray, hit_record& hit) = 0;
 };
