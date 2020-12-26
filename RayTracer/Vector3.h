@@ -46,6 +46,10 @@ public:
 		return Vector3(this->x * scale, this->y * scale, this->z * scale);
 	}
 
+	Vector3 operator *(const Vector3& other) const {
+		return Vector3(this->x * other.x, this->y * other.y, this->z * other.z);
+	}
+
 	Vector3 operator /(const T& scale) const {
 		return Vector3(this->x / scale, this->y / scale, this->z / scale);
 	}

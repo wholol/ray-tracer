@@ -4,6 +4,8 @@
 class Ray
 {
 public:
+	Ray() {}
+
 	Ray(const Vector3d& origin, const Vector3d& Dir) 
 		:Origin(origin) , Dir(Dir)  {}
 

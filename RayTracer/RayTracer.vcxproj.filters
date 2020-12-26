@@ -32,9 +32,6 @@
     <ClInclude Include="Sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HitPoint.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Geometries.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -42,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="RNG.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Materials.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

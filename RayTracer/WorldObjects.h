@@ -12,7 +12,6 @@ public:
 		objects.emplace_back(std::move(geo));
 	}
 
-	
 	void clearWorld()
 	{
 		objects.clear();

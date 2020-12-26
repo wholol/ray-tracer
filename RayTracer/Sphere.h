@@ -2,24 +2,26 @@
 #include "Vector3.h"
 #include "Ray.h"
 #include <math.h>
-#include "HitPoint.h"
 #include "Geometries.h"
 
 /*the point where the sphere hits*/
+
+/*all types of geometries that can get hit (e.g. sphere, cube etc)*/
+/*each geometry has diffeerent ray interesect function.*/
+
 
 class Sphere : public Geometries
 {
 
 public:
 
-	Sphere(Vector3d CircleCenter, double radius)
-		:CircleCenter(CircleCenter) , radius(radius)
+	Sphere(Vector3d CircleCenter, double radius,std::shared_ptr<material> mat)
+		:CircleCenter(CircleCenter) , radius(radius) , mat(mat)
 	{}
 
 	bool HitRay(double tMin, double tMax,const Ray& ray, hit_record& rec) override
 	{
 		double a = ray.GetDir().getDotProduct(ray.GetDir());	//get the dot product of the ray direction.
-
 		Vector3d temp = ray.GetOrgin() - CircleCenter;
 		double c = -(radius * radius) + temp.getDotProduct(temp);
 		double b = 2 * ray.GetDir().getDotProduct(temp);
@@ -36,6 +38,7 @@ public:
 				rec.point = ray.at(get_t_val);
 				Vector3d outward_normal = (rec.point - CircleCenter) / radius;
 				rec.set_face_normal(ray, outward_normal);
+				rec.mat_ptr = mat;
 				return true;
 			}			
 		}
@@ -47,7 +50,7 @@ public:
 private:
 	Vector3d CircleCenter;
 	double radius;
-	HitPoint In;
-	HitPoint Out;
+	std::shared_ptr<material> mat;
+	
 
 };

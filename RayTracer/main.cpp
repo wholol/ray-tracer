@@ -5,6 +5,7 @@
 #include "WriteColor.h"
 #include "Ray.h"
 #include "WorldObjects.h"
+#include "Materials.h"
 #include "Geometries.h"
 #include "Sphere.h"
 #include "RNG.h"
@@ -27,15 +28,20 @@ ColorVec Color(const Ray& r, WorldObjects& world, int depth)
 
 	if (world.HitRay(r, 0.0001, INFINITY, rec))	//if the ray hits any object in world
 	{
-		Vector3d target = rec.point + rec.normal + point_unit_circle;
-		return (Color(Ray(rec.point , target - rec.point), world , depth -1)) * 0.5;
+		Ray scatter;		//dependant on material struck by ray
+		ColorVec atten;		//depedant of material struck by ray.
+		if (rec.mat_ptr->scatter(r, rec, atten, scatter))
+		{
+			return Color(scatter, world, depth - 1) * atten;
+		}
+		return ColorVec(0, 0, 0);
 	}
 
 	else//if no intersection
 	{
 		Vector3d n = r.GetDir().getNormalized();
 		double t = (n.y * 0.5) + 1.0;
-		ColorVec col = ColorVec(1.0, 1.0, 1.0) * (1.0 - t) + ColorVec(0.5, 0.7, 1.0) * t;
+		ColorVec col = ColorVec(0.8, 1.0, 1.0) * (1.0 - t) + ColorVec(0.5, 0.7, 1.0) * t;	//background is the light source.
 		return col;
 	}
 }
@@ -64,14 +70,21 @@ int main()
 	//to determine corner positions: http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
 	Vector3d bottom_left_corner = origin - (horizontal / 2) - (vertical / 2) + (focal * d);
 
+	//material setup
+	auto material_ground = std::make_shared<lambertian>(ColorVec(0.8, 0.8, 0.0));
+	auto material_center = std::make_shared<lambertian>(ColorVec(0.7, 0.3, 0.3));
+	auto material_left = std::make_shared<dielectric>(1.5);
+	auto material_right = std::make_shared<metal>(ColorVec(0.8, 0.6, 0.2),0.96);
+
 	//world objects setup
 	WorldObjects world;
-	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1), 0.5));
-	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1), 100));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1), 0.5,material_ground));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1), 100,material_center));
+	world.addObject(std::make_shared<Sphere>(Vector3d(-1.0, 0.0, -1.0), 0.5, material_left));
+	world.addObject(std::make_shared<Sphere>(Vector3d(1.0, 0.0, -1.0), 0.5, material_right));
 
 	//anti aliasing samples
 	const int samples = 100;
-
 	const int max_depth = 50;
 
 	//image setup
