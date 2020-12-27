@@ -128,6 +128,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Geometries.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="Ray.h" />

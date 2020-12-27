@@ -9,6 +9,7 @@
 #include "Geometries.h"
 #include "Sphere.h"
 #include "RNG.h"
+#include "Camera.h"
 
 ColorVec Color(const Ray& r, WorldObjects& world, int depth)
 {
@@ -55,31 +56,19 @@ int main()
 	const int image_height = (double)image_width / AspectRatio;	
 	const int rgb_max = 256;
 
-	/*ray origin*/
-	Vector3d RayOrigin(0.0, 0.0, 0.0);
-
 	/*viewport*/
-	double viewport_height = 2.0;
-	double viewport_width = AspectRatio * viewport_height;
-	double d = 1.0;		//distance from origin to viewport center
-
-	Vector3d origin(0, 0, 0);
-	Vector3d focal(0, 0, -1.0);	//unit vector from origin to viewport center
-	Vector3d horizontal(viewport_width, 0.0, 0.0);
-	Vector3d vertical(0.0, viewport_height, 0.0);
-	//to determine corner positions: http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
-	Vector3d bottom_left_corner = origin - (horizontal / 2) - (vertical / 2) + (focal * d);
+	Camera cam(AspectRatio, 70.0);
 
 	//material setup
 	auto material_ground = std::make_shared<lambertian>(ColorVec(0.8, 0.8, 0.0));
-	auto material_center = std::make_shared<lambertian>(ColorVec(0.7, 0.3, 0.3));
+	auto material_center = std::make_shared<lambertian>(ColorVec(1.0, 0.6, 0.3));
 	auto material_left = std::make_shared<dielectric>(1.5);
 	auto material_right = std::make_shared<metal>(ColorVec(0.8, 0.6, 0.2),0.96);
 
 	//world objects setup
 	WorldObjects world;
-	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1), 0.5,material_ground));
-	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1), 100,material_center));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1), 0.5,material_center));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1), 100,material_ground));
 	world.addObject(std::make_shared<Sphere>(Vector3d(-1.0, 0.0, -1.0), 0.5, material_left));
 	world.addObject(std::make_shared<Sphere>(Vector3d(1.0, 0.0, -1.0), 0.5, material_right));
 
@@ -103,9 +92,7 @@ int main()
 				double u = (double)(j + RNG::rng()) / (double)(image_height - 1);		//image height ratio
 				double v = (double)(i + RNG::rng()) / (double)(image_width - 1);		//image width ratio (for unit vector scale)
 				//to determine the ray vector : http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
-				Ray r(RayOrigin, bottom_left_corner + horizontal * v + vertical * u - origin);
-				pixel += Color(r, world,max_depth);
-
+				pixel += Color(cam.GetRayDir(u , v ), world,max_depth);
 			}
 
 			ColorToFile(fout,pixel,rgb_max,samples);

@@ -58,6 +58,10 @@ public:
 		return sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
 	}
 
+	T getMagnitude_sq() const {
+		return this->x * this->x + this->y * this->y + this->z * this->z;
+	}
+
 	Vector3 getNormalized() const {
 		T r = 1 / getMagnitude(); return  Vector3(this->x * r, this->y * r, this->z * r);
 	}

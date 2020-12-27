@@ -89,21 +89,41 @@ public:
 	bool scatter(const Ray& r, const hit_record& rec, ColorVec& attenuation, Ray& scattered) const override
 	{
 		attenuation = ColorVec(1.0, 1.0, 1.0);
-		double refractio_ratio = rec.front_face ? (1.0 / ir) : ir;
+		double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
+		double cos_theta = fmin((r.GetDir().getNormalized() * -1).getDotProduct(rec.normal) , 1.0);
+		double sin_theta = std::sqrt(1 - cos_theta * cos_theta);
 
-		auto refracted = [](const Vector3d& uv, const Vector3d& n, double etai_over_etat)
+		if (refraction_ratio * sin_theta > 1.0)	
 		{
-			Vector3d t = uv * -1;
-			auto g = uv.getDotProduct(n);
+			//reflect
+			auto reflect = [](const Vector3d& v, const Vector3d& n)
+			{
+				return v - (n * v.getDotProduct(n) * 2);
+			};
 
-			auto cos_theta = fmin(g, 1.0);
-			Vector3d r_out_perp = (uv + n * cos_theta) * etai_over_etat;
-			Vector3d r_out_parallel = n * -sqrt(fabs(1.0 - r_out_perp.getMagnitude()));
-			return r_out_perp + r_out_parallel;
-		};
+			Vector3d reflect_ray = reflect(r.GetDir().getNormalized(), rec.normal);
+			scattered = Ray(rec.point, reflect_ray);
+			return (scattered.GetDir().getDotProduct(rec.normal) > 0);
 
-		auto getrefracted = refracted(r.GetDir().getNormalized(), rec.normal, refractio_ratio);
-		scattered = Ray(rec.point, getrefracted);
+		}
+		else {
+
+			//refraction
+			auto refracted = [](const Vector3d& uv, const Vector3d& n, double etai_over_etat)
+			{
+				Vector3d t = uv * -1;
+				double g = t.getDotProduct(n);
+
+				double cos_theta = fmin(g, 1.0);
+				Vector3d r_out_perp = (uv + (n * cos_theta)) * etai_over_etat;
+				Vector3d r_out_parallel = n * -sqrt(fabs(1.0 - r_out_perp.getMagnitude_sq()));
+				return r_out_perp + r_out_parallel;
+			};
+
+			Vector3d getrefracted = refracted(r.GetDir().getNormalized(), rec.normal, refraction_ratio);
+			scattered = Ray(rec.point, getrefracted);
+		}
+
 		return true;
 	}
 
