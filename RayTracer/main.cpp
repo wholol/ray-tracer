@@ -57,7 +57,8 @@ int main()
 	const int rgb_max = 256;
 
 	/*viewport*/
-	Camera cam(AspectRatio, 70.0);
+	Camera cam(Vector3d(-2 , 2 , 1) , Vector3d(0.0 ,0.0 , -1.0) ,Vector3d(0.0 ,1.0,0.0),AspectRatio, 90.0);
+	auto R = cos(3.14159 / 4);
 
 	//material setup
 	auto material_ground = std::make_shared<lambertian>(ColorVec(0.8, 0.8, 0.0));
@@ -67,10 +68,10 @@ int main()
 
 	//world objects setup
 	WorldObjects world;
-	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1), 0.5,material_center));
-	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1), 100,material_ground));
-	world.addObject(std::make_shared<Sphere>(Vector3d(-1.0, 0.0, -1.0), 0.5, material_left));
-	world.addObject(std::make_shared<Sphere>(Vector3d(1.0, 0.0, -1.0), 0.5, material_right));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, 0, -1.0), 0.5,material_center));
+	world.addObject(std::make_shared<Sphere>(Vector3d(0, -100.5, -1.0), 100,material_ground));
+	world.addObject(std::make_shared<Sphere>(Vector3d(-1.0, 0.0, -1.0), -0.45, material_left));
+	world.addObject(std::make_shared<Sphere>(Vector3d(1.0, 0.0, -1.0),0.5, material_right));
 
 	//anti aliasing samples
 	const int samples = 100;
