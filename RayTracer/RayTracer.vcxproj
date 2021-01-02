@@ -134,6 +134,7 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RNG.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="WorldObjects.h" />
     <ClInclude Include="WriteColor.h" />

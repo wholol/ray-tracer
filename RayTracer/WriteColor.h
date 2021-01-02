@@ -3,18 +3,24 @@
 #include <fstream>
 #include "Vector3.h"
 #include <algorithm>
+#include <vector>
+#include "Camera.h"
+#include "WorldObjects.h"
 
-void ColorToFile(std::ofstream& fout, const Vector3d& ColorVec,const int& rgb_max,const int& samples)
+
+
+void ColorToFile(std::ofstream& fout,const int& rgb_max,const int& samples,int i , int j, int image_width, const std::vector<ColorVec>& pixels)
 {
-	//std::sqrt for gamma corerction
-	double s = samples;
-	double r = std::sqrt(std::min( ColorVec.x / s , 0.99));
-	double g = std::sqrt(std::min(ColorVec.y / s, 0.99));
-	double b = std::sqrt(std::min(ColorVec.z / s, 0.99));
+	//r << //g  << // b
+	fout << (int)pixels[i + image_width * j].x << " " << (int)pixels[i + image_width * j].y << " " << (int)pixels[i + image_width * j].z << '\n';
 
+}
 
-
-	//std::cout << ColorVec.x << " " << ColorVec.y << " " << ColorVec.z << '\n';
-	fout << (int)(r * (double)rgb_max) << " " << (int)(g * (double)rgb_max) << " " << (int)(b *(double)rgb_max) << '\n';
+void ColorToFile(std::ofstream& fout,ColorVec& c, const int& max_rgb, const int& samples)
+{
+	int r = int(std::sqrt(std::min(c.x / samples, 0.99)) * (double)max_rgb);
+	int g = int(std::sqrt(std::min(c.y / samples, 0.99)) * (double)max_rgb);
+	int b = int(std::sqrt(std::min(c.z / samples, 0.99)) * (double)max_rgb);
+	fout << r << " " << g << " " << b << '\n';
 
 }

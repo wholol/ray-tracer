@@ -39,6 +39,5 @@ public:
 
 private:
 	std::vector<std::shared_ptr<Geometries>> objects;	
-	bool hit;
 
 };
