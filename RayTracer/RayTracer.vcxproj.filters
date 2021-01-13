@@ -64,7 +64,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\images\RayTracer.ppm">
+    <None Include="src\Core\RayTracer.ppm">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
