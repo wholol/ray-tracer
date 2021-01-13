@@ -15,44 +15,56 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\Hittables\Hittables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Ray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vector3.h">
+    <ClInclude Include="src\Hittables\Hittables.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="WriteColor.h">
+    <ClInclude Include="src\Materials\Materials.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ray.h">
+    <ClInclude Include="src\Utility\Timer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometries.h">
+    <ClInclude Include="src\Utility\RNG.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="WorldObjects.h">
+    <ClInclude Include="src\Utility\Vector3.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RNG.h">
+    <ClInclude Include="src\Core\Camera.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials.h">
+    <ClInclude Include="src\Core\Ray.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="src\Core\Scene.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
+    <ClInclude Include="src\Core\WriteColor.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\HitPoint.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="RayTracer.ppm">
+    <None Include="src\images\RayTracer.ppm">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
