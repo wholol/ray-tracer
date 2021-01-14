@@ -19,7 +19,7 @@ public:
 	{
 		Vector3d point_unit_circle = RNG::rng_vec(-1.0, 1.0);
 		
-		while (point_unit_circle.getMagnitude() >= 1.0)
+		while (point_unit_circle.getMagnitude_squared() >= 1.0)
 		{
 			point_unit_circle = RNG::rng_vec(-1.0, 1.0);
 		}
@@ -30,7 +30,7 @@ public:
 			return fabs(scat.x < s) && fabs(scat.y < s) && fabs(scat.z < s);
 		};
 
-		Vector3d scatter_dir = rec.normal + point_unit_circle;
+		Vector3d scatter_dir = rec.normal + point_unit_circle.getNormalized();
 
 		if (near_zero(scatter_dir))
 		{
@@ -38,7 +38,7 @@ public:
 		}
 
 		scattered = Ray(rec.point, scatter_dir);	//construct the new scattered ray vector
-		attenuation = albedo;
+		attenuation = albedo;		//attenuation be the object color.
 		
 		return true;
 	}
@@ -89,37 +89,37 @@ public:
 	{
 		attenuation = ColorVec(1.0, 1.0, 1.0);
 		double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
-		double cos_theta = fmin((r.GetDir().getNormalized() * -1).getDotProduct(rec.normal) , 1.0);
-		double sin_theta = std::sqrt(1 - cos_theta * cos_theta);
-
-		if (refraction_ratio * sin_theta > 1.0)	
+		
+		Vector3d ray_unit_dir = r.GetDir().getNormalized();
+		double cos_theta = fmin((r.GetDir().getNormalized() * -1.0).getDotProduct(rec.normal) , 1.0);
+		double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+		
+		//reflect
+		if (refraction_ratio * sin_theta > 1.0 || reflectance(cos_theta, refraction_ratio) > RNG::rng())
 		{
 			//reflect
 			auto reflect = [](const Vector3d& v, const Vector3d& n)
 			{
 				return v - (n * v.getDotProduct(n) * 2);
 			};
-
-			Vector3d reflect_ray = reflect(r.GetDir().getNormalized(), rec.normal);
+		
+			Vector3d reflect_ray = reflect(ray_unit_dir, rec.normal);
 			scattered = Ray(rec.point, reflect_ray);
-			return (scattered.GetDir().getDotProduct(rec.normal) > 0);
 		}
 
+		//refract
 		else {
-
-			//refraction
 			auto refracted = [](const Vector3d& uv, const Vector3d& n, double etai_over_etat)
 			{
-				Vector3d t = uv * -1;
-				double g = t.getDotProduct(n);
-
-				double cos_theta = fmin(g, 1.0);
-				Vector3d r_out_perp = (uv + (n * cos_theta)) * etai_over_etat;
-				Vector3d r_out_parallel = n * -sqrt(fabs(1.0 - r_out_perp.getMagnitude_squared()));
+				double g = (uv * -1.0).getDotProduct(n);
+				double cos_refract = fmin(g, 1.0);	//cosine
+				Vector3d r_out_perp = (uv + n * cos_refract) * etai_over_etat;
+				double r_perp_mag_sq = r_out_perp.getMagnitude_squared();
+				Vector3d r_out_parallel = n * -sqrt(fabs(1.0 - r_perp_mag_sq));
 				return r_out_perp + r_out_parallel;
 			};
 
-			Vector3d getrefracted = refracted(r.GetDir().getNormalized(), rec.normal, refraction_ratio);
+			Vector3d getrefracted = refracted(ray_unit_dir, rec.normal, refraction_ratio);
 			scattered = Ray(rec.point, getrefracted);
 		}
 
@@ -128,4 +128,12 @@ public:
 
 public:
 	double ir;
+
+private:
+	static double reflectance(double cosine, double ref_idx) {
+		// Use Schlick's approximation for reflectance.
+		auto r0 = (1 - ref_idx) / (1 + ref_idx);
+		r0 = r0 * r0;
+		return r0 + (1 - r0)*pow((1 - cosine), 5);
+	}
 };

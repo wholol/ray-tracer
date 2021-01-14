@@ -77,7 +77,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,7 +103,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,15 +128,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Camera.cpp" />
-    <ClCompile Include="src\Hittables\Hittables.cpp" />
     <ClCompile Include="src\Core\main.cpp" />
     <ClCompile Include="src\Core\Ray.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
+    <ClCompile Include="src\Hittables\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Core\Camera.h" />
     <ClInclude Include="src\Hittables\Hittables.h" />
     <ClInclude Include="src\Core\HitPoint.h" />
+    <ClInclude Include="src\Hittables\Sphere.h" />
     <ClInclude Include="src\Materials\Materials.h" />
     <ClInclude Include="src\Core\Ray.h" />
     <ClInclude Include="src\Utility\RNG.h" />

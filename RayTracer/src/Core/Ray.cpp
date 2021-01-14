@@ -1,7 +1,7 @@
 #include "Ray.h"
 
-Ray::Ray(const Vector3d & origin, const Vector3d & Dir)
-	:Origin(origin), Dir(Dir) {}
+Ray::Ray(const Vector3d & camerapos, const Vector3d & Dir)
+	:Origin(camerapos), Dir(Dir) {}
 
 Vector3d Ray::at(double t) const
 {

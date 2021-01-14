@@ -6,7 +6,7 @@ class Ray
 public:
 	
 	Ray() {};
-	Ray(const Vector3d& origin, const Vector3d& Dir);
+	Ray(const Vector3d& camerapos, const Vector3d& Dir);
 	Vector3d at(double t) const;
 	Vector3d GetOrgin() const;
 	Vector3d GetDir() const;

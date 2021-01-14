@@ -1,26 +1,24 @@
 #include "Camera.h"
 
-Camera::Camera(Vector3d lookfrom, Vector3d lookat, Vector3d up, const double & Aspect_Ratio, double fov, double aperture)
+Camera::Camera(Vector3d lookfrom, Vector3d lookat,const double & Aspect_Ratio, double fov, double aperture,double focus_distance)
 {
+	const double deg2rad = (3.14159 / 180.0);
 	const double AspectRatio = Aspect_Ratio;
-	double d = 1.0;		//distance from origin to viewport center
-	double h = tan(fov * (3.14159 / 180) * 0.5);
+	double h = tan(fov * deg2rad * 0.5);
 	double viewport_height = 2.0 * h;
 	double viewport_width = AspectRatio * viewport_height;
 
-	w = (lookfrom - lookat).getNormalized();
-	uv = up.getCrossProduct(w).getNormalized();
-	vv = w.getCrossProduct(uv);
+	forward = (lookfrom - lookat).getNormalized();
+	right = tmp.getCrossProduct(forward).getNormalized();
+	up = forward.getCrossProduct(right);
 
-	origin = lookfrom;
-
-	double focus_dist = (lookfrom - lookat).getMagnitude();
-
-	horizontal = uv * viewport_width * focus_dist;
-	vertical = vv * viewport_height * focus_dist;
-	//to determine corner positions: http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
-	bottom_left_corner = origin + (horizontal / 2) + (vertical / 2) - w * focus_dist;
-
+	camerapos = lookfrom;
+	
+	//focus distance: specify where should the image be focused/clear.
+	horizontal = right * viewport_width * focus_distance;		
+	vertical = up * viewport_height * focus_distance;
+	//to determine corner positions of a camera: http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
+	top_right_corner = camerapos - (horizontal * 0.5) + (vertical * 0.5) - forward * focus_distance;
 	lens_radius = aperture * 0.5;
 }
 
@@ -40,9 +38,9 @@ Ray Camera::GetRayDir(double u, double v) const
 	Vector3d p = rng_lens_point();
 	Vector3d rd = p * lens_radius;				//unit vec * distance
 
-	Vector3d offset = uv * rd.x + vv * rd.y;
+	Vector3d offset = right * rd.x + up * rd.y;
 
-	return Ray(origin + offset, bottom_left_corner - horizontal * v - vertical * u - origin - offset);
+	return Ray(camerapos + offset, top_right_corner + horizontal * v - vertical * u - camerapos - offset);  //direction ray should subtract offset to "balance the ray out"
 }
 
 
