@@ -68,14 +68,14 @@ void ColorPixels(int xStart, int xEnd, int yStart, int yEnd, const int image_wid
 int main()
 {
 	/*image dimension setup*/
-	const double AspectRatio = 3.0 / 2.0;
+	const double AspectRatio = 16.0 / 9.0;
 	const int image_width = 1200;
 	const int image_height = (int)((double)image_width / AspectRatio);
 
 
 	/*camera setup*/
-	Vector3d campos(-3, 10, 30);
-	Vector3d lookat(0.0, 0.0, -1.0);
+	Vector3d campos(13, 2, 3);
+	Vector3d lookat(0.0, 0.0, 0.0);
 	double focus_dist = campos.getMagnitude();
 	double arperture = 0.0;		//same thing as lens diameter
 	double fov = 20.0;
