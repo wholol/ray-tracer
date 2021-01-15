@@ -1,6 +1,4 @@
 # ray-tracer
-ray tracer implementation 
-
-<img src="RayTracer/src/images/raytrace.png" >   
+Ray tracer implementation
 
 <img src="RayTracer/src/images/image1.PNG" >   
