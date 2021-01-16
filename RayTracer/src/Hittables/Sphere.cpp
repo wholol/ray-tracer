@@ -1,6 +1,6 @@
 #include "Sphere.h"
 
-Sphere::Sphere(Vector3d CircleCenter, double radius, std::shared_ptr<Material> mat)
+Sphere::Sphere(Point3d CircleCenter, double radius, std::shared_ptr<Material> mat)
 	:CircleCenter(CircleCenter), radius(radius), mat(mat)
 {}
 
@@ -16,24 +16,32 @@ bool Sphere::Intersect(double tMin, double tMax, const Ray& ray, hit_point& hitp
 	if (det > 0.0)
 	{
 		double get_t_val = (-b - (sqrt(det))) / (2.0 * a);	//get the closer root value
-		
 
-		if (get_t_val > tMax || get_t_val < tMin)	//if t value within bounds
+		if (get_t_val > tMax || get_t_val < tMin)	//if within bounds
 		{
 			get_t_val = (-b + (sqrt(det))) / (2.0 * a);
-
-			if (get_t_val > tMax || get_t_val < tMin)
+			if (get_t_val > tMax || get_t_val < tMin)	//if within bounds
 			{
 				return false;
 			}
+
+			hitpoint.t = get_t_val;
+			hitpoint.point = ray.at(get_t_val);
+			Vector3d outward_normal = (hitpoint.point - CircleCenter) / radius;
+			hitpoint.set_face_normal(ray, outward_normal);
+			hitpoint.mat_ptr = mat;
+			return true;
 		}
-		hitpoint.t = get_t_val;
-		hitpoint.point = ray.at(get_t_val);
-		Vector3d outward_normal = (hitpoint.point - CircleCenter) / radius;
-		hitpoint.set_face_normal(ray, outward_normal);
-		hitpoint.mat_ptr = mat;
-		return true;
 	}
 
 	return false;
 }
+
+bool Sphere::bounding_box(double time0, double time1, AABB& output_box) const
+{
+	Point3d min(CircleCenter.x - radius, CircleCenter.y - radius, CircleCenter.z - radius);
+	Point3d max(CircleCenter.x + radius, CircleCenter.y + radius, CircleCenter.z + radius);
+
+	output_box = AABB(min,max);
+}
+

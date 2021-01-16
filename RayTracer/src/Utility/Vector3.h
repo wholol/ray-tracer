@@ -81,8 +81,25 @@ public:
 		T zCross = this->x * other.y - this->y * other.x;
 		return Vector3<T>(xCross, yCross, zCross);
 	}
+
+	T operator[](int index) const {
+		if (index == 0)
+		{
+			return x;
+		}
+
+		if (index == 1)
+		{
+			return y;
+		}
+		if (index == 2)
+		{
+			return z;
+		}
+	}
 };
 
 using Vector3f = Vector3<float>;
 using Vector3d = Vector3<double>;
+using Point3d = Vector3<double>;
 using ColorVec = Vector3<double>;

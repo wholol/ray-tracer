@@ -4,11 +4,11 @@
 class Sphere : public Hittables
 {
 public:
-	Sphere(Vector3d CircleCenter, double radius, std::shared_ptr<Material> mat);
+	Sphere(Point3d CircleCenter, double radius, std::shared_ptr<Material> mat);
 	bool Intersect(double tMin, double tMax, const Ray& ray, hit_point& hitpoint) override;
-
+	bool bounding_box(double time0, double time1, AABB& output_box) const override;
 private:
-	Vector3d CircleCenter;
+	Point3d CircleCenter;
 	double radius;
 	std::shared_ptr<Material> mat;
 };

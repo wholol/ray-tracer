@@ -77,7 +77,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\BVH;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,7 +103,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\BVH;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,6 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BVH\AABB.cpp" />
+    <ClCompile Include="src\BVH\BVH.cpp" />
     <ClCompile Include="src\Core\Camera.cpp" />
     <ClCompile Include="src\Core\main.cpp" />
     <ClCompile Include="src\Core\Ray.cpp" />
@@ -134,6 +136,8 @@
     <ClCompile Include="src\Hittables\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BVH\AABB.h" />
+    <ClInclude Include="src\BVH\BVH.h" />
     <ClInclude Include="src\Core\Camera.h" />
     <ClInclude Include="src\Hittables\Hittables.h" />
     <ClInclude Include="src\Core\HitPoint.h" />
