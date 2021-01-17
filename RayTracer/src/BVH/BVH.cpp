@@ -5,6 +5,7 @@ BVH::BVH(std::vector<std::shared_ptr<Hittables>>& SceneObjects)
 	:SceneObjects_(SceneObjects)
 {
 	root = new BVH_node();
+	root->box = computeBoundingVolume(SceneObjects_);
 	construct(root, SceneObjects_);
 }
 
@@ -52,15 +53,10 @@ void BVH::construct(BVH_node* node, std::vector<std::shared_ptr<Hittables>>& obj
 		}
 		
 		int midpoint;
-		midpoint = N / 2;
-		if (N % 2 != 0)
-		{
-			midpoint = N + 1 / 2;
-		}
-	
+		midpoint = (N + 1) / 2;
+		
 		//first half
 		std::vector<std::shared_ptr<Hittables>> firstpartition;
-		firstpartition.reserve(midpoint);
 		for (int i = 0; i < midpoint; ++i)
 		{
 			firstpartition.emplace_back(objects[i]);
@@ -84,25 +80,26 @@ void BVH::construct(BVH_node* node, std::vector<std::shared_ptr<Hittables>>& obj
 
 AABB BVH::computeBoundingVolume(std::vector<std::shared_ptr<Hittables>>& objects)
 {
+	
 	if (objects.size() > 0) {
 		bool first = true;
-
-		auto surrounding_box = [](AABB& first, AABB& second) {
+		
+		auto merge_boxes = [](AABB& first, AABB& second) {
 			Point3d min(fmin(first.min().x, second.min().x),
 				fmin(first.min().y, second.min().y),
 				fmin(first.min().z, second.min().z));
-
+	
 			Point3d max(fmax(first.max().x, second.max().x),
 				fmax(first.max().y, second.max().y),
 				fmax(first.max().z, second.max().z));
-
+	
 			return AABB(min, max);
 		};
-
+	
 		AABB single_object_box;
 		AABB output_box;		//output box = the total bonding box for all objects.
 		bool first_object = true;
-
+	
 		for (auto& object : objects)
 		{
 			if (first_object)
@@ -112,7 +109,7 @@ AABB BVH::computeBoundingVolume(std::vector<std::shared_ptr<Hittables>>& objects
 			}
 			else {
 				object->bounding_box(0, 0, single_object_box);
-				output_box = surrounding_box(output_box, single_object_box);
+				output_box = merge_boxes(output_box, single_object_box);
 			}
 		}
 		return output_box;
@@ -121,33 +118,72 @@ AABB BVH::computeBoundingVolume(std::vector<std::shared_ptr<Hittables>>& objects
 
 bool BVH::traverseBVH(const Ray& r, double tMin, double tMax,hit_point& hitpoint)
 {
+	hit_point tmp;
+
+	bool hit_object = traverseBVH_parallel(r, tMin, tMax, tmp, root);
 	
-	double t_closest = tMax;
-	bool hit_object = false;
-	
-	hit_point temp;	
-	pq.push(root);	//initalize with the root node.
-	while (!pq.empty())	//is queue isnt empty AND the minimum t value of the bounding box is smaller than t closest
+	if (hit_object)
 	{
-		BVH_node* candidate = pq.top();		//get the node with the box distance that is nearest
-		pq.pop();							
-		
-		if (candidate->isLeaf)
+		hitpoint = tmp;
+	}
+	return hit_object;
+
+	//double t_closest = tMax;
+	//bool hit_object = false;
+	//
+	//hit_point temp;	
+	//pq.push(root);	//initalize with the root node.
+	//while (!pq.empty())	//is queue isnt empty AND the minimum t value of the bounding box is smaller than t closest
+	//{
+	//	BVH_node* candidate = pq.top();		//get the node with the box distance that is nearest
+	//	pq.pop();							
+	//	
+	//	if (candidate->isLeaf)
+	//	{
+	//		const auto& object = candidate->leaf_object;
+	//		if (object->Intersect(tMin, t_closest, r, temp) && temp.t < t_closest)
+	//		{
+	//			hitpoint = temp;		//update hit point
+	//			t_closest = temp.t;		//update the closest distance to the object.
+	//			hit_object = true;
+	//		}
+	//		
+	//	}
+	//
+	//	else {
+	//		//use t_closest,no point testing the rays behind the closest place.
+	//		ComputeRayAABB(r, tMin, t_closest, candidate->left);		
+	//		ComputeRayAABB(r, tMin, t_closest, candidate->right);
+	//	}
+	//}
+	//return hit_object;
+}
+
+bool BVH::traverseBVH_parallel(const Ray& r, double tMin, double tMax, hit_point& hitpoint, BVH_node* node)
+{
+	static bool hit_object = false;
+	static hit_point temp;
+	static double t_closest = tMax;
+
+	if (node->box.Intersect(r, tMin, t_closest))	//stop traversing furhter down if no intersection occurs.
+	{
+
+		if (node->isLeaf)
 		{
-			if (candidate->leaf_object->Intersect(tMin ,t_closest,r,temp) && temp.t < t_closest)	
-			{ 
+			const auto& object = node->leaf_object;
+			if (object->Intersect(tMin, t_closest, r, temp) && temp.t < t_closest)
+			{
 				hitpoint = temp;		//update hit point
 				t_closest = temp.t;		//update the closest distance to the object.
 				hit_object = true;
 			}
 		}
-
 		else {
-			//use t_closest,no point testing the rays behind the closest place.
-			ComputeRayAABB(r, tMin, t_closest, candidate->left);		
-			ComputeRayAABB(r, tMin, t_closest, candidate->right);
+			traverseBVH_parallel(r, tMin, t_closest, hitpoint, node->left);
+			traverseBVH_parallel(r, tMin, t_closest, hitpoint, node->right);
 		}
 	}
+
 	return hit_object;
 }
 

@@ -13,25 +13,27 @@ bool Sphere::Intersect(double tMin, double tMax, const Ray& ray, hit_point& hitp
 	double det = b * b - 4 * a*c;
 
 	//if a solution for t exists on the sphere
+	//if a solution for t exists on the sphere
 	if (det > 0.0)
 	{
 		double get_t_val = (-b - (sqrt(det))) / (2.0 * a);	//get the closer root value
 
-		if (get_t_val > tMax || get_t_val < tMin)	//if within bounds
+
+		if (get_t_val > tMax || get_t_val < tMin)	//if t value within bounds
 		{
 			get_t_val = (-b + (sqrt(det))) / (2.0 * a);
-			if (get_t_val > tMax || get_t_val < tMin)	//if within bounds
+
+			if (get_t_val > tMax || get_t_val < tMin)
 			{
 				return false;
 			}
-
-			hitpoint.t = get_t_val;
-			hitpoint.point = ray.at(get_t_val);
-			Vector3d outward_normal = (hitpoint.point - CircleCenter) / radius;
-			hitpoint.set_face_normal(ray, outward_normal);
-			hitpoint.mat_ptr = mat;
-			return true;
 		}
+		hitpoint.t = get_t_val;
+		hitpoint.point = ray.at(get_t_val);
+		Vector3d outward_normal = (hitpoint.point - CircleCenter) / radius;
+		hitpoint.set_face_normal(ray, outward_normal);
+		hitpoint.mat_ptr = mat;
+		return true;
 	}
 
 	return false;

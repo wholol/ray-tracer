@@ -12,7 +12,7 @@
 #include <future>
 #include "Timer.h"
 
-#define PARALLEL 1
+#define PARALLEL 0
 #define tMin 0.0001
 #define tMax INFINITY
 
@@ -61,7 +61,6 @@ void ColorPixels(int xStart, int xEnd, int yStart, int yEnd, const int image_wid
 			pixels[x + image_width * y].x = std::sqrt(std::min(pixel.x * inv_samples, 0.99)) * (double)max_rgb;
 			pixels[x + image_width * y].y = std::sqrt(std::min(pixel.y * inv_samples, 0.99)) * (double)max_rgb;
 			pixels[x + image_width * y].z = std::sqrt(std::min(pixel.z * inv_samples, 0.99)) * (double)max_rgb;
-
 		}
 	}
 }
@@ -88,35 +87,35 @@ int main()
 	auto ground_material = std::make_shared<Lambertian>(ColorVec(0.5, 0.5, 0.5));
 	scene.addObject(std::make_shared<Sphere>(Vector3d(0, -1000, 0), 1000, ground_material));
 
-	//for (int a = -11; a < 11; a++) {
-	//	for (int b = -11; b < 11; b++) {
-	//		auto choose_mat = RNG::rng();
-	//		Vector3d center(a + 0.9*RNG::rng(), 0.2, b + 0.9*RNG::rng());
-	//
-	//		if ((center - Vector3d(4, 0.2, 0)).getMagnitude_squared() > 0.9) {
-	//			std::shared_ptr<Material> sphere_material;
-	//
-	//			if (choose_mat < 0.8) {
-	//				// diffuse
-	//				auto albedo = ColorVec(RNG::rng(), RNG::rng(), RNG::rng()) * ColorVec(RNG::rng(), RNG::rng(), RNG::rng());
-	//				sphere_material = std::make_shared<Lambertian>(albedo);
-	//				scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
-	//			}
-	//			else if (choose_mat < 0.95) {
-	//				// metal
-	//				auto albedo = ColorVec(RNG::rng(0.5 , 1.0), RNG::rng(0.5, 1.0), RNG::rng(0.5, 1.0));
-	//				auto fuzz = RNG::rng(0.0, 0.5);
-	//				sphere_material = std::make_shared<Metal>(albedo, fuzz);
-	//				scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
-	//			}
-	//			else {
-	//				// glass
-	//				sphere_material = std::make_shared<Dielectric>(1.5);
-	//				scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
-	//			}
-	//		}
-	//	}
-	//}
+	for (int a = -11; a < 11; a++) {
+		for (int b = -11; b < 11; b++) {
+			auto choose_mat = RNG::rng();
+			Vector3d center(a + 0.9*RNG::rng(), 0.2, b + 0.9*RNG::rng());
+	
+			if ((center - Vector3d(4, 0.2, 0)).getMagnitude_squared() > 0.9) {
+				std::shared_ptr<Material> sphere_material;
+	
+				if (choose_mat < 0.8) {
+					// diffuse
+					auto albedo = ColorVec(RNG::rng(), RNG::rng(), RNG::rng()) * ColorVec(RNG::rng(), RNG::rng(), RNG::rng());
+					sphere_material = std::make_shared<Lambertian>(albedo);
+					scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
+				}
+				//else if (choose_mat < 0.95) {
+				//	// metal
+				//	auto albedo = ColorVec(RNG::rng(0.5 , 1.0), RNG::rng(0.5, 1.0), RNG::rng(0.5, 1.0));
+				//	auto fuzz = RNG::rng(0.0, 0.5);
+				//	sphere_material = std::make_shared<Metal>(albedo, fuzz);
+				//	scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
+				//}
+				//else {
+				//	// glass
+				//	sphere_material = std::make_shared<Dielectric>(1.5);
+				//	scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
+				//}
+			}
+		}
+	}
 	//
 	auto material1 = std::make_shared<Dielectric>(1.5);
 	scene.addObject(std::make_shared<Sphere>(Vector3d(0, 1, 0), 1.0, material1));
@@ -145,6 +144,8 @@ int main()
 	//scene.addObject(std::make_unique<Sphere>(Vector3d(0.0, 0.0, -1.0), 0.5, material_center));
 	//scene.addObject(std::make_unique<Sphere>(Vector3d(-1.0, 0.0, -1.0), 0.5, material_left));
 	//scene.addObject(std::make_unique<Sphere>(Vector3d(1.0, 0.0, -1.0), 0.5, material_right));
+
+	scene.buildSceneBVH();
 
 	//anti aliasing samples
 	const int samples = 50;
@@ -204,7 +205,7 @@ int main()
 #else
 	Timer serial;
 	serial.start_timer();
-	ColorPicture(0, image_width, 0, image_height, image_width, image_height, samples, max_depth, rgb_max, std::ref(world), std::ref(cam), std::ref(pixels));
+	ColorPixels(0, image_width, 0, image_height, image_width, image_height, samples, max_depth, rgb_max, std::ref(scene), std::ref(cam), std::ref(pixels));
 	serial.end_timer();
 	serial.print_dt();
 #endif
