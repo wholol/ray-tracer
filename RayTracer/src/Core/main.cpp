@@ -44,8 +44,8 @@ ColorVec RayTrace(const Ray& r, Scene& scene, int max_depth)
 	}
 }
 
-void ColorPixels(int xStart, int xEnd, int yStart, int yEnd, const int image_width, const int image_height, const int samples, const int max_depth, const int max_rgb, 
-				Scene& world, Camera& cam, std::vector<ColorVec>& pixels)
+void ColorPixels(int xStart, int xEnd, int yStart, int yEnd, const int image_width, const int image_height, const int samples, const int max_depth, const int max_rgb,
+	Scene& world, Camera& cam, std::vector<ColorVec>& pixels)
 {
 	for (int y = yStart; y < yEnd; y++)		//row
 	{
@@ -58,13 +58,14 @@ void ColorPixels(int xStart, int xEnd, int yStart, int yEnd, const int image_wid
 				pixel += RayTrace(cam.GetRayDir(u, v), world, max_depth);
 			}
 			double inv_samples = 1.0 / (double)samples;
-			pixels[x + image_width*y].x = std::sqrt(std::min(pixel.x * inv_samples, 0.99)) * (double)max_rgb;
-			pixels[x + image_width*y].y = std::sqrt(std::min(pixel.y * inv_samples, 0.99)) * (double)max_rgb;
-			pixels[x + image_width*y].z = std::sqrt(std::min(pixel.z * inv_samples, 0.99)) * (double)max_rgb;
+			pixels[x + image_width * y].x = std::sqrt(std::min(pixel.x * inv_samples, 0.99)) * (double)max_rgb;
+			pixels[x + image_width * y].y = std::sqrt(std::min(pixel.y * inv_samples, 0.99)) * (double)max_rgb;
+			pixels[x + image_width * y].z = std::sqrt(std::min(pixel.z * inv_samples, 0.99)) * (double)max_rgb;
 
 		}
 	}
 }
+
 
 int main()
 {
@@ -73,19 +74,20 @@ int main()
 	const int image_width = 1200;
 	const int image_height = (int)((double)image_width / AspectRatio);
 
+
 	/*camera setup*/
 	Vector3d campos(13, 2, 3);
 	Vector3d lookat(0.0, 0.0, 0.0);
 	double focus_dist = campos.getMagnitude();
 	double arperture = 0.0;		//same thing as lens diameter
 	double fov = 20.0;
-	Camera cam(campos, lookat, AspectRatio, fov, arperture,focus_dist);
-	
+	Camera cam(campos, lookat, AspectRatio, fov, arperture, focus_dist);
+
 	/*Scene setup*/
 	Scene scene;
 	auto ground_material = std::make_shared<Lambertian>(ColorVec(0.5, 0.5, 0.5));
 	scene.addObject(std::make_shared<Sphere>(Vector3d(0, -1000, 0), 1000, ground_material));
-		
+
 	//for (int a = -11; a < 11; a++) {
 	//	for (int b = -11; b < 11; b++) {
 	//		auto choose_mat = RNG::rng();
@@ -98,19 +100,19 @@ int main()
 	//				// diffuse
 	//				auto albedo = ColorVec(RNG::rng(), RNG::rng(), RNG::rng()) * ColorVec(RNG::rng(), RNG::rng(), RNG::rng());
 	//				sphere_material = std::make_shared<Lambertian>(albedo);
-	//				scene.addObject(std::make_shared<Sphere>(center, 0.2, sphere_material));
+	//				scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
 	//			}
 	//			else if (choose_mat < 0.95) {
 	//				// metal
 	//				auto albedo = ColorVec(RNG::rng(0.5 , 1.0), RNG::rng(0.5, 1.0), RNG::rng(0.5, 1.0));
 	//				auto fuzz = RNG::rng(0.0, 0.5);
 	//				sphere_material = std::make_shared<Metal>(albedo, fuzz);
-	//				scene.addObject(std::make_shared<Sphere>(center, 0.2, sphere_material));
+	//				scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
 	//			}
 	//			else {
 	//				// glass
 	//				sphere_material = std::make_shared<Dielectric>(1.5);
-	//				scene.addObject(std::make_shared<Sphere>(center, 0.2, sphere_material));
+	//				scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
 	//			}
 	//		}
 	//	}
@@ -121,8 +123,8 @@ int main()
 	//
 	auto material2 = std::make_shared<Lambertian>(ColorVec(0.4, 0.2, 0.1));
 	scene.addObject(std::make_shared<Sphere>(Vector3d(-4, 1, 0), 1.0, material2));
-	
-	
+
+
 	auto material3 = std::make_shared<Metal>(ColorVec(0.7, 0.6, 0.5), 0.0);
 	scene.addObject(std::make_shared<Sphere>(Vector3d(4, 1, 0), 1.0, material3));
 	////material setup
@@ -163,7 +165,7 @@ int main()
 		pixels.emplace_back();
 	}
 
-//parallel impl
+	//parallel impl
 #if PARALLEL	
 	int num_chunks = 800;
 	int section_height = image_height / num_chunks;
@@ -172,7 +174,7 @@ int main()
 	int chunksize = 30;
 	Timer t;
 	t.start_timer();
-	
+
 	//for (int yStart = 0; yStart < image_height; yStart += chunksize)
 	//{
 	//	for (int xStart = 0; xStart < image_width; xStart += chunksize)
@@ -182,14 +184,14 @@ int main()
 	//		fus.push_back(std::async(std::launch::async, ColorPixels, xStart, xEnd, yStart, yEnd, image_width, image_height, samples, max_depth, rgb_max, std::ref(world), std::ref(cam), std::ref(pixels)));
 	//	}
 	//}
-	
+
 	for (int i = 0; i < num_chunks; ++i)
 	{
 		int xStart = 0;
 		const int& xEnd = image_width;
 		int yStart = (i * section_height);
 		int yEnd = ((i + 1) * section_height);
-		fus.push_back( std::async(std::launch::async, ColorPixels, xStart, xEnd, yStart, yEnd , image_width,image_height,samples,max_depth,rgb_max,std::ref(scene),std::ref(cam),std::ref(pixels) ));
+		fus.push_back(std::async(std::launch::async, ColorPixels, xStart, xEnd, yStart, yEnd, image_width, image_height, samples, max_depth, rgb_max, std::ref(scene), std::ref(cam), std::ref(pixels)));
 	}
 
 	for (auto& f : fus)
@@ -210,7 +212,7 @@ int main()
 	//pass to I/O
 	for (int y = 0; y < image_height; ++y) {
 		for (int x = 0; x < image_width; ++x) {
-			ColorToFile(fout, rgb_max, samples,x, y, image_width,pixels);
+			ColorToFile(fout, rgb_max, samples, x, y, image_width, pixels);
 		}
 	}
 }
