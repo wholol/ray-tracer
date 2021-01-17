@@ -13,6 +13,8 @@
 #include "Timer.h"
 
 #define PARALLEL 1
+#define tMin 0.0001
+#define tMax INFINITY
 
 ColorVec RayTrace(const Ray& r, Scene& scene, int max_depth)
 {
@@ -22,7 +24,7 @@ ColorVec RayTrace(const Ray& r, Scene& scene, int max_depth)
 		return ColorVec(0, 0, 0);
 	}
 
-	if (scene.Intersect(r, 0.0001, INFINITY, hitpoint))	//if the ray hits any object in scene, get the interction point parameters
+	if (scene.Intersect(r, tMin, tMax, hitpoint))	//if the ray hits any object in scene, get the interction point parameters
 	{
 		Ray newray;		//a new ray to be generated based on the material intersection
 		ColorVec atten;		//depedant of material struck by ray.
@@ -68,7 +70,7 @@ void ColorPixels(int xStart, int xEnd, int yStart, int yEnd, const int image_wid
 int main()
 {
 	/*image dimension setup*/
-	const double AspectRatio = 16.0 / 9.0;
+	const double AspectRatio = 3.0 / 2.0;
 	const int image_width = 1200;
 	const int image_height = (int)((double)image_width / AspectRatio);
 
@@ -115,7 +117,7 @@ int main()
 			}
 		}
 	}
-	//
+	
 	auto material1 = std::make_shared<Dielectric>(1.5);
 	scene.addObject(std::make_unique<Sphere>(Vector3d(0, 1, 0), 1.0, material1));
 	//
@@ -165,7 +167,7 @@ int main()
 
 //parallel impl
 #if PARALLEL	
-	int num_chunks = 400;
+	int num_chunks = 800;
 	int section_height = image_height / num_chunks;
 	std::vector<std::future<void>> fus;
 	fus.reserve(num_chunks);
