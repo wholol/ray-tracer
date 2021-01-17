@@ -97,6 +97,7 @@ public:
 			return z;
 		}
 	}
+
 };
 
 using Vector3f = Vector3<float>;

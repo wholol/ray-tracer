@@ -13,6 +13,8 @@
 #include "Timer.h"
 
 #define PARALLEL 1
+#define tMin 0.0001
+#define tMax INFINITY
 
 ColorVec RayTrace(const Ray& r, Scene& scene, int max_depth)
 {
@@ -22,7 +24,7 @@ ColorVec RayTrace(const Ray& r, Scene& scene, int max_depth)
 		return ColorVec(0, 0, 0);
 	}
 
-	if (scene.Intersect(r, 0.0001, INFINITY, hitpoint))	//if the ray hits any object in scene, get the interction point parameters
+	if (scene.Intersect(r, tMin, tMax, hitpoint))	//if the ray hits any object in scene, get the interction point parameters
 	{
 		Ray newray;		//a new ray to be generated based on the material intersection
 		ColorVec atten;		//depedant of material struck by ray.
@@ -82,47 +84,47 @@ int main()
 	/*Scene setup*/
 	Scene scene;
 	auto ground_material = std::make_shared<Lambertian>(ColorVec(0.5, 0.5, 0.5));
-	scene.addObject(std::make_unique<Sphere>(Vector3d(0, -1000, 0), 1000, ground_material));
+	scene.addObject(std::make_shared<Sphere>(Vector3d(0, -1000, 0), 1000, ground_material));
 		
-	for (int a = -11; a < 11; a++) {
-		for (int b = -11; b < 11; b++) {
-			auto choose_mat = RNG::rng();
-			Vector3d center(a + 0.9*RNG::rng(), 0.2, b + 0.9*RNG::rng());
-	
-			if ((center - Vector3d(4, 0.2, 0)).getMagnitude_squared() > 0.9) {
-				std::shared_ptr<Material> sphere_material;
-	
-				if (choose_mat < 0.8) {
-					// diffuse
-					auto albedo = ColorVec(RNG::rng(), RNG::rng(), RNG::rng()) * ColorVec(RNG::rng(), RNG::rng(), RNG::rng());
-					sphere_material = std::make_shared<Lambertian>(albedo);
-					scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
-				}
-				else if (choose_mat < 0.95) {
-					// metal
-					auto albedo = ColorVec(RNG::rng(0.5 , 1.0), RNG::rng(0.5, 1.0), RNG::rng(0.5, 1.0));
-					auto fuzz = RNG::rng(0.0, 0.5);
-					sphere_material = std::make_shared<Metal>(albedo, fuzz);
-					scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
-				}
-				else {
-					// glass
-					sphere_material = std::make_shared<Dielectric>(1.5);
-					scene.addObject(std::make_unique<Sphere>(center, 0.2, sphere_material));
-				}
-			}
-		}
-	}
+	//for (int a = -11; a < 11; a++) {
+	//	for (int b = -11; b < 11; b++) {
+	//		auto choose_mat = RNG::rng();
+	//		Vector3d center(a + 0.9*RNG::rng(), 0.2, b + 0.9*RNG::rng());
+	//
+	//		if ((center - Vector3d(4, 0.2, 0)).getMagnitude_squared() > 0.9) {
+	//			std::shared_ptr<Material> sphere_material;
+	//
+	//			if (choose_mat < 0.8) {
+	//				// diffuse
+	//				auto albedo = ColorVec(RNG::rng(), RNG::rng(), RNG::rng()) * ColorVec(RNG::rng(), RNG::rng(), RNG::rng());
+	//				sphere_material = std::make_shared<Lambertian>(albedo);
+	//				scene.addObject(std::make_shared<Sphere>(center, 0.2, sphere_material));
+	//			}
+	//			else if (choose_mat < 0.95) {
+	//				// metal
+	//				auto albedo = ColorVec(RNG::rng(0.5 , 1.0), RNG::rng(0.5, 1.0), RNG::rng(0.5, 1.0));
+	//				auto fuzz = RNG::rng(0.0, 0.5);
+	//				sphere_material = std::make_shared<Metal>(albedo, fuzz);
+	//				scene.addObject(std::make_shared<Sphere>(center, 0.2, sphere_material));
+	//			}
+	//			else {
+	//				// glass
+	//				sphere_material = std::make_shared<Dielectric>(1.5);
+	//				scene.addObject(std::make_shared<Sphere>(center, 0.2, sphere_material));
+	//			}
+	//		}
+	//	}
+	//}
 	//
 	auto material1 = std::make_shared<Dielectric>(1.5);
-	scene.addObject(std::make_unique<Sphere>(Vector3d(0, 1, 0), 1.0, material1));
+	scene.addObject(std::make_shared<Sphere>(Vector3d(0, 1, 0), 1.0, material1));
 	//
 	auto material2 = std::make_shared<Lambertian>(ColorVec(0.4, 0.2, 0.1));
-	scene.addObject(std::make_unique<Sphere>(Vector3d(-4, 1, 0), 1.0, material2));
+	scene.addObject(std::make_shared<Sphere>(Vector3d(-4, 1, 0), 1.0, material2));
 	
 	
 	auto material3 = std::make_shared<Metal>(ColorVec(0.7, 0.6, 0.5), 0.0);
-	scene.addObject(std::make_unique<Sphere>(Vector3d(4, 1, 0), 1.0, material3));
+	scene.addObject(std::make_shared<Sphere>(Vector3d(4, 1, 0), 1.0, material3));
 	////material setup
 	//auto material_ground = std::make_shared<Lambertian>(ColorVec(0.8, 0.8, 0.0));
 	//auto material_center = std::make_shared<Lambertian>(ColorVec(0.1, 0.2, 0.5));
@@ -163,7 +165,7 @@ int main()
 
 //parallel impl
 #if PARALLEL	
-	int num_chunks = 400;
+	int num_chunks = 800;
 	int section_height = image_height / num_chunks;
 	std::vector<std::future<void>> fus;
 	fus.reserve(num_chunks);

@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Utility;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Hittables;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Materials;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\Core;C:\Users\jeremy\source\repos\RayTracer\RayTracer\src\BVH;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

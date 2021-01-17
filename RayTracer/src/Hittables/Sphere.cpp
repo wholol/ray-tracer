@@ -37,7 +37,7 @@ bool Sphere::Intersect(double tMin, double tMax, const Ray& ray, hit_point& hitp
 	return false;
 }
 
-bool Sphere::bounding_box(double time0, double time1, AABB& output_box) const
+void Sphere::bounding_box(double time0, double time1, AABB& output_box) const
 {
 	Point3d min(CircleCenter.x - radius, CircleCenter.y - radius, CircleCenter.z - radius);
 	Point3d max(CircleCenter.x + radius, CircleCenter.y + radius, CircleCenter.z + radius);

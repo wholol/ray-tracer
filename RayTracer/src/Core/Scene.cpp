@@ -1,8 +1,14 @@
 #include "Scene.h"
 
-void Scene::addObject(std::unique_ptr<Hittables> object)
+void Scene::addObject(std::shared_ptr<Hittables> object)
 {
 	objects.emplace_back(std::move(object));
+}
+
+void Scene::buildSceneBVH()
+{
+	bvh = BVH(objects);
+	BVH_built = true;
 }
 
 void Scene::clearScene()
@@ -12,11 +18,12 @@ void Scene::clearScene()
 
 bool Scene::Intersect(const Ray& r, double tMin, double tMax, hit_point& hitpoint)
 {
+
 	bool hit_anything = false;
 	hit_point temp;
 	double closest = tMax;
 	
-	for (auto& object : objects)
+	for (auto& object : objects)		//O(n)
 	{
 		if (object->Intersect(tMin, closest, r, temp))
 		{
@@ -25,6 +32,15 @@ bool Scene::Intersect(const Ray& r, double tMin, double tMax, hit_point& hitpoin
 			hitpoint = temp;
 		}
 	}
+
+	//if (!BVH_built)
+	//{
+	//	throw std::runtime_error("bvh has not been built.");
+	//}
+	//else {
+	//	return (bvh.traverseBVH(r, tMin, tMax, hitpoint));
+	//}
+
 	
 	return hit_anything;
 }

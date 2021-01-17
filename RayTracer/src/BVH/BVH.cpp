@@ -1,14 +1,14 @@
 #include "BVH.h"
+#include "RNG.h"
 
-
-BVH::BVH(std::vector<Hittables>& objects)
+BVH::BVH(std::vector<std::shared_ptr<Hittables>>& SceneObjects)
+	:SceneObjects_(SceneObjects)
 {
-
-	BVH_node* root = new BVH_node();
-	construct(root, objects);
+	root = new BVH_node();
+	construct(root, SceneObjects_);
 }
 
-void BVH::construct(BVH_node* node, std::vector<Hittables>& objects)		//copy the vector, we do not ant to sort the real vector.
+void BVH::construct(BVH_node* node, std::vector<std::shared_ptr<Hittables>>& objects)		//copy the vector, we do not ant to sort the real vector.
 {
 	int N = objects.size();
 
@@ -16,38 +16,64 @@ void BVH::construct(BVH_node* node, std::vector<Hittables>& objects)		//copy the
 	
 	if (N == 1)
 	{
-		node->obj.push_back(objects[0]);	//makes a copy. objects will get destroyed in the stack frame. do not se a pointer to it.
+		node->isLeaf = true;
+		node->leaf_object = objects[0];	
 		return;
 	}
 
-
 	else
 	{
-		//set up an axis to sort with.
-		std::sort(objects.begin(), objects.end());		//sort accordingly to the axis.
+		int random_axis = RNG::rng_int(0, 2);		
+
+		switch (random_axis)
+		{
+		case 0:	//sort by x axis
+			std::sort(objects.begin(), objects.end(), [](std::shared_ptr<Hittables>& one, std::shared_ptr<Hittables>& two) {
+														AABB box_a, box_b;
+														one->bounding_box(0, 0, box_a);
+														two->bounding_box(0, 0, box_b);
+														return box_a.min().x < box_b.min().x;});
+			break;
+		
+		case 1:	//sort by y axis
+			std::sort(objects.begin(), objects.end(), [](std::shared_ptr<Hittables>& one, std::shared_ptr<Hittables>& two) {
+														AABB box_a, box_b;
+														one->bounding_box(0, 0, box_a);
+														two->bounding_box(0, 0, box_b);
+														return box_a.min().y < box_b.min().y; });
+			break;
+		case 2:	//sort by z axis
+			std::sort(objects.begin(), objects.end(), [](std::shared_ptr<Hittables>& one, std::shared_ptr<Hittables>& two) {
+														AABB box_a, box_b;
+														one->bounding_box(0, 0, box_a);
+														two->bounding_box(0, 0, box_b);
+														return box_a.min().z < box_b.min().z; });
+			break;
+		}
 		
 		int midpoint;
 		midpoint = N / 2;
-		if (N / 2 != 0)
+		if (N % 2 != 0)
 		{
 			midpoint = N + 1 / 2;
 		}
 	
-
-		std::vector<Hittables> firstpartition;
+		//first half
+		std::vector<std::shared_ptr<Hittables>> firstpartition;
+		firstpartition.reserve(midpoint);
 		for (int i = 0; i < midpoint; ++i)
 		{
 			firstpartition.emplace_back(objects[i]);
 		}
-
 		BVH_node* new_left = new BVH_node();
 		node->left = new_left;
 		construct(node->left, firstpartition);
 
-		std::vector<Hittables> secondpartition;
+		//second half
+		std::vector<std::shared_ptr<Hittables>> secondpartition;
 		for (int i = midpoint; i < objects.size(); ++i)
 		{
-			secondpartition.emplace_back(objects[i]);
+			secondpartition.emplace_back(objects[i]);	
 		}
 
 		BVH_node* new_right = new BVH_node();
@@ -56,36 +82,85 @@ void BVH::construct(BVH_node* node, std::vector<Hittables>& objects)		//copy the
 	}
 }
 
-AABB BVH::computeBoundingVolume(std::vector<Hittables>& objects)
+AABB BVH::computeBoundingVolume(std::vector<std::shared_ptr<Hittables>>& objects)
 {
-	bool first = true;
+	if (objects.size() > 0) {
+		bool first = true;
 
-	auto surrounding_box = [](AABB& first, AABB& second) {
-		Point3d min(fmin(first.min().x, second.min().x),
-					fmin(first.min().y, second.min().y),
-					fmin(first.min().z, second.min().z));
+		auto surrounding_box = [](AABB& first, AABB& second) {
+			Point3d min(fmin(first.min().x, second.min().x),
+				fmin(first.min().y, second.min().y),
+				fmin(first.min().z, second.min().z));
 
-		Point3d max(fmax(first.max().x, second.max().x),
-					fmax(first.max().y, second.max().y),
-					fmax(first.max().z, second.max().z));
+			Point3d max(fmax(first.max().x, second.max().x),
+				fmax(first.max().y, second.max().y),
+				fmax(first.max().z, second.max().z));
 
-		return AABB(min, max);
-	};
+			return AABB(min, max);
+		};
 
-	AABB single_object_box;
-	AABB output_box;		//output box = the total bonding box for all objects.
-	bool first_object = true;
-	for (auto& object : objects)
-	{
-		if (first_object)
+		AABB single_object_box;
+		AABB output_box;		//output box = the total bonding box for all objects.
+		bool first_object = true;
+
+		for (auto& object : objects)
 		{
-			object.bounding_box(0, 0, output_box);	//get the bunding box of an invididual object
-			first_object = false;
+			if (first_object)
+			{
+				object->bounding_box(0, 0, output_box);	//get the bunding box of an invididual object
+				first_object = false;
+			}
+			else {
+				object->bounding_box(0, 0, single_object_box);
+				output_box = surrounding_box(output_box, single_object_box);
+			}
 		}
+		return output_box;
+	}
+}
+
+bool BVH::traverseBVH(const Ray& r, double tMin, double tMax,hit_point& hitpoint)
+{
+	
+	double t_closest = tMax;
+	bool hit_object = false;
+	
+	hit_point temp;	
+	pq.push(root);	//initalize with the root node.
+	while (!pq.empty())	//is queue isnt empty AND the minimum t value of the bounding box is smaller than t closest
+	{
+		BVH_node* candidate = pq.top();		//get the node with the box distance that is nearest
+		pq.pop();							
+		
+		if (candidate->isLeaf)
+		{
+			if (candidate->leaf_object->Intersect(tMin ,t_closest,r,temp) && temp.t < t_closest)	
+			{ 
+				hitpoint = temp;		//update hit point
+				t_closest = temp.t;		//update the closest distance to the object.
+				hit_object = true;
+			}
+		}
+
 		else {
-			object.bounding_box(0, 0, single_object_box);
-			output_box = surrounding_box(output_box, single_object_box);
+			//use t_closest,no point testing the rays behind the closest place.
+			ComputeRayAABB(r, tMin, t_closest, candidate->left);		
+			ComputeRayAABB(r, tMin, t_closest, candidate->right);
 		}
 	}
-	return output_box;
+	return hit_object;
 }
+
+void BVH::ComputeRayAABB(const Ray& r, double tMin,double tMax, BVH_node* node)
+{
+	if (!node->box.Intersect(r, tMin, tMax))
+	{
+		return;
+	}
+	else
+	{
+		pq.push(node);
+	}
+
+}
+
