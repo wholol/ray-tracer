@@ -23,8 +23,10 @@ ColorVec RayTrace(const Ray& r, Scene& scene, int max_depth)
 	if (max_depth <= 0) {
 		return ColorVec(0, 0, 0);
 	}
-
-	if (scene.Intersect(r, tMin, tMax, hitpoint))	//if the ray hits any object in scene, get the interction point parameters
+	
+	bool intersectscene = false; 
+	intersectscene = scene.Intersect(r, tMin, tMax, hitpoint);
+	if (intersectscene)	//if the ray hits any object in scene, get the interction point parameters
 	{
 		Ray newray;		//a new ray to be generated based on the material intersection
 		ColorVec atten;		//depedant of material struck by ray.

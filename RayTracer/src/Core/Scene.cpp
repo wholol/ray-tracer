@@ -18,7 +18,6 @@ void Scene::clearScene()
 
 bool Scene::Intersect(const Ray& r, double tMin, double tMax, hit_point& hitpoint)
 {
-
 	//bool hit_anything = false;
 	//hit_point temp;
 	//double closest = tMax;
@@ -32,17 +31,16 @@ bool Scene::Intersect(const Ray& r, double tMin, double tMax, hit_point& hitpoin
 	//		hitpoint = temp;
 	//	}
 	//}
-	//
+	
 	//return hit_anything;
+
 
 	if (!BVH_built)
 	{
 		throw std::runtime_error("bvh has not been built.");
 	}
-	else {
-		return (bvh.traverseBVH(r, tMin, tMax, hitpoint));
-	}
 
-	
-	
+	return bvh.traverseBVH(r, tMin, tMax, hitpoint);
+
+
 }

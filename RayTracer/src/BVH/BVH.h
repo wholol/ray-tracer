@@ -37,7 +37,7 @@ private:
 	//helper functions
 	void construct(BVH_node* node, std::vector<std::shared_ptr<Hittables>>& objects);
 	AABB computeBoundingVolume(std::vector<std::shared_ptr<Hittables>>& objects);
-	void ComputeRayAABB(const Ray& r, double tMin, double tMax, BVH_node* node);
+	void ComputeRayAABB(const Ray& r, double tMin, double tMax, BVH_node* node , std::priority_queue<BVH_node*, std::vector<BVH_node*>, comparator>& pq);
 
 private:
 	std::priority_queue<BVH_node*, std::vector<BVH_node*>, comparator> pq;	
