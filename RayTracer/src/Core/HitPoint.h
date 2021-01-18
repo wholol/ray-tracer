@@ -11,7 +11,7 @@ struct hit_point
 	Vector3d normal;
 	double t;
 	bool front_face;
-	std::shared_ptr<Material> mat_ptr;
+	std::shared_ptr<Material> mat_ptr = nullptr;
 
 	//this function is used to flip the normal, in the event that there is a ray in the object (caused by refraction)
 	void set_face_normal(const Ray& r, const Vector3d& outward_normal)

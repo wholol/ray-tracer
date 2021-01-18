@@ -22,6 +22,12 @@ Point3d AABB::tmin() const
 	return t_minimum;
 }
 
+double AABB::tmin_magnitude() const
+{
+	return t_minimum_magnitude;
+}
+
+
 
 bool AABB::Intersect(const Ray& r, double t_min, double t_max)
 {
@@ -35,11 +41,24 @@ bool AABB::Intersect(const Ray& r, double t_min, double t_max)
 		t_min = t0 > t_min ? t0 : t_min;
 		t_max = t1 < t_max ? t1 : t_max;
 		if (t_max <= t_min)
+			t_minimum_magnitude = INFINITY;
 			return false;
-		if (i == 0)	t_minimum.x = t_min;
-		if (i == 1)	t_minimum.y = t_min;
-		if (i == 2)	t_minimum.z = t_min;
-	
+
+		switch (i)
+		{
+		case 0:
+			t_minimum.x = t_min;
+			break;
+		case 1:
+			t_minimum.y = t_min;
+			break;
+		case 2:
+			t_minimum.z = t_min;
+			break;
+		}
 	}
+
+	t_minimum_magnitude = t_minimum.getMagnitude();
+
 	return true;
 }

@@ -3,7 +3,7 @@
 
 BVH::BVH(std::vector<std::shared_ptr<Hittables>>& SceneObjects)
 	:SceneObjects_(SceneObjects)
-{
+{	
 	root = new BVH_node();
 	root->box = computeBoundingVolume(SceneObjects_);
 	construct(root, SceneObjects_);
@@ -117,70 +117,88 @@ AABB BVH::computeBoundingVolume(std::vector<std::shared_ptr<Hittables>>& objects
 
 bool BVH::traverseBVH(const Ray& r, double tMin, double tMax,hit_point& hitpoint)
 {
-	//return traverseBVH_parallel(r, tMin, tMax, hitpoint, root);
-	double t_closest = tMax;
-	bool hit_object = false;
-	//std::priority_queue<BVH_node*, std::vector<BVH_node*>, comparator> pq;	//local priority queue for multithreading. TODO: REMOVE THIS IF POSSIBLE, PERFORMING ALOT OF REALLOCS.
-	hit_point temp;	
-	pq.push(root);	//initalize with the root node.
 	
-	while (!pq.empty())	
-	{
-		BVH_node* candidate = pq.top();		//get the node with the box distance that is nearest
-		pq.pop();
-		
-		if (candidate->isLeaf)
-		{
-			const auto& object = candidate->leaf_object;
-			if (object->Intersect(tMin, t_closest, r, temp) && temp.t < t_closest)
-			{
-				hitpoint = temp;		//update hit point
-				t_closest = temp.t;		//update the closest distance to the object.
-				hit_object = true;
-			}
-			
-		}
+	bool hit = false;
+	traverseBVH_parallel(r, tMin, tMax, hitpoint, root , hit);	
 	
-		else {
-			//use t_closest,no point testing the rays behind the closest place.
-			ComputeRayAABB(r, tMin, t_closest, candidate->left,pq);
-			ComputeRayAABB(r, tMin, t_closest, candidate->right,pq);
-		}
-	}
-	return hit_object;
+	return hit;	//hit is passed by ref,same wih hitpoint
+	
+	//double t_closest = tMax;
+	//bool hit_object = false;
+	//
+	//hit_point temp;
+	//pq.push(root);	//initalize with the root node.
+	//while (!pq.empty())	//is queue isnt empty AND the minimum t value of the bounding box is smaller than t closest
+	//{
+	//	BVH_node* candidate = pq.top();		//get the node with the box distance that is nearest
+	//	pq.pop();
+	//
+	//	if (candidate->isLeaf)
+	//	{
+	//		if (candidate->leaf_object->Intersect(tMin, t_closest, r, temp) && temp.t < t_closest)
+	//		{
+	//			hitpoint = temp;		//update hit point
+	//			t_closest = temp.t;		//update the closest distance to the object.
+	//			hit_object = true;
+	//		}
+	//	}
+	//
+	//	else {
+	//		//use t_closest,no point testing the rays behind the closest place.
+	//		ComputeRayAABB(r, tMin, t_closest, candidate->left);
+	//		ComputeRayAABB(r, tMin, t_closest, candidate->right);
+	//	}
+	//}
+	//return hit_object;
 }
 
-bool BVH::traverseBVH_parallel(const Ray& r, double tMin, double tMax, hit_point& hitpoint, BVH_node* node)
+void BVH::traverseBVH_parallel(const Ray& r, double tMin, double& tMax, hit_point& hitpoint, BVH_node* node,bool& hit)
 {
-	hit_point temp;
 	static double t_closest = tMax;
-
-	if (node && node->box.Intersect(r, tMin, t_closest) && node->box.tmin().getMagnitude() < t_closest)	
+	
+	if (!node->box.Intersect(r, tMin, tMax))	//one thing to note here: tMax is already upated to be hitpoint.t (passed by ref)
 	{
-		if (node->isLeaf)
-		{
-			const auto& object = node->leaf_object;
-		
-			if (object->Intersect(tMin, t_closest, r, temp) && temp.t < t_closest)
-			{
-				hitpoint = temp;		//update hit point
-				t_closest = temp.t;		//update the closest distance to the object.
-				return true;
-			}
-			
-		}
-		else {
-			return traverseBVH_parallel(r, tMin, t_closest, hitpoint, node->left) || traverseBVH_parallel(r, tMin, t_closest, hitpoint, node->right);
-			
-		}
+		return;
 	}
-	else
+
+	if (node->isLeaf)	//also prevents taversing null pointers.
 	{
-		return false;
+		if (node->leaf_object->Intersect(tMin, tMax, r, hitpoint) && hitpoint.t < tMax)
+		{
+			hit = true;
+			tMax = hitpoint.t;
+		}
+
+		return;
+	}
+	else {
+
+		//double left_node = INFINITY;
+		//double right_node = INFINITY;
+		//
+		//node->left->box.Intersect(r, tMin, tMax);
+		//left_node = node->left->box.tmin_magnitude();
+		//
+		//node->right->box.Intersect(r, tMin, tMax);
+		//right_node = node->right->box.tmin_magnitude();
+		//
+		//BVH_node* closer_node = (left_node <= right_node) ? node->left : node->right;
+		//BVH_node* further_node = (left_node <= right_node) ? node->right : node->left;
+		//
+		//
+		//traverseBVH_parallel(r, tMin, tMax, hitpoint, closer_node, hit);
+		//if (further_node->box.tmin_magnitude() < tMax) {
+		//	traverseBVH_parallel(r, tMin, tMax, hitpoint, further_node, hit);
+		//}
+
+
+		traverseBVH_parallel(r, tMin, tMax, hitpoint, node->left, hit);
+		traverseBVH_parallel(r, tMin, tMax, hitpoint, node->right,hit);
+		
 	}
 }
 
-void BVH::ComputeRayAABB(const Ray& r, double tMin,double tMax, BVH_node* node ,std::priority_queue<BVH_node*, std::vector<BVH_node*>, comparator>& pq)
+void BVH::ComputeRayAABB(const Ray& r, double tMin,double tMax, BVH_node* node)
 {
 	if (!node->box.Intersect(r, tMin, tMax))
 	{

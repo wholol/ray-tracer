@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-Camera::Camera(Vector3d lookfrom, Vector3d lookat,const double & Aspect_Ratio, double fov, double aperture,double focus_distance)
+Camera::Camera(Vector3d lookfrom, Vector3d lookat,const double& Aspect_Ratio, double fov, double aperture,double focus_distance)
 {
 	const double deg2rad = (3.14159 / 180.0);
 	const double AspectRatio = Aspect_Ratio;
